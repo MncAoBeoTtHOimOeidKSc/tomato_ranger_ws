@@ -1,0 +1,26 @@
+/build/
+/devel/
+/install/
+/logs/
+/build_isolated/
+/devel_isolated/
+/install_isolated/
+/.catkin_workspace
+/src/CMakeLists.txt
+# Dependencies are vendored with their current local changes.
+/src/ugv_sdk/.gitmodules
+**/.git
+*.bag
+*.bag.active
+*.pcd
+*.log
+*.pyc
+__pycache__/
+*.swp
+*.swo
+*~
+*.orig
+*.o
+*.a
+*.so
+.DS_Store

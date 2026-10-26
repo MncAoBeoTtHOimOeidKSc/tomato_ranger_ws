@@ -1,0 +1,15 @@
+# Ranger footprint about base_link: 0.72 m (x) by 0.50 m (y).
+# Add 0.15 m to both overall dimensions, plus the existing 0.02 m per side.
+# This removes close environment returns too; it is not a collision footprint.
+scan_filter_chain:
+  - name: vehicle_footprint
+    type: laser_filters/LaserScanBoxFilter
+    params:
+      box_frame: $(arg base_frame)
+      min_x: -0.455
+      max_x: 0.455
+      min_y: -0.345
+      max_y: 0.345
+      min_z: -1.0
+      max_z: 1.0
+      invert: false

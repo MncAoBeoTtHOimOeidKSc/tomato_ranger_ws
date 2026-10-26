@@ -1,0 +1,40 @@
+<launch>
+  <arg name="map_file" default="$(env HOME)/maps/ranger_map.yaml"/>
+  <arg name="start_scan" default="true"/>
+  <arg name="rviz" default="true"/>
+  <arg name="enable_motion" default="false"/>
+  <arg name="scan_topic" default="/helios/scan_filtered"/>
+  <arg name="odom_topic" default="/ranger_base_node/odom"/>
+
+  <!-- Existing chassis and lidar drivers must be started separately. -->
+  <include if="$(arg start_scan)" file="$(find ranger_mapping)/launch/helios_scan.launch">
+    <arg name="filtered_scan_topic" value="$(arg scan_topic)"/>
+  </include>
+
+  <node pkg="map_server" type="map_server" name="map_server"
+        args="$(arg map_file)" output="screen">
+    <param name="frame_id" value="map"/>
+  </node>
+
+  <node pkg="amcl" type="amcl" name="amcl" output="screen">
+    <rosparam command="load" file="$(find ranger_navigation)/config/amcl.yaml"/>
+    <remap from="scan" to="$(arg scan_topic)"/>
+  </node>
+
+  <node pkg="move_base" type="move_base" name="move_base" output="screen">
+    <rosparam command="load" file="$(find ranger_navigation)/config/move_base.yaml"/>
+    <rosparam command="load" file="$(find ranger_navigation)/config/costmap_common.yaml" ns="global_costmap"/>
+    <rosparam command="load" file="$(find ranger_navigation)/config/costmap_common.yaml" ns="local_costmap"/>
+    <rosparam command="load" file="$(find ranger_navigation)/config/costmaps.yaml"/>
+    <rosparam command="load" file="$(find ranger_navigation)/config/dwa.yaml"/>
+    <param name="global_costmap/obstacle_layer/laser/topic" value="$(arg scan_topic)"/>
+    <param name="local_costmap/obstacle_layer/laser/topic" value="$(arg scan_topic)"/>
+    <param name="DWAPlannerROS/odom_topic" value="$(arg odom_topic)"/>
+    <!-- Preview is the default; only an explicit opt-in reaches the chassis. -->
+    <remap if="$(arg enable_motion)" from="cmd_vel" to="/cmd_vel"/>
+    <remap unless="$(arg enable_motion)" from="cmd_vel" to="/navigation/cmd_vel"/>
+  </node>
+
+  <node if="$(arg rviz)" pkg="rviz" type="rviz" name="navigation_rviz"
+        args="-d $(find ranger_navigation)/rviz/navigation.rviz" output="screen"/>
+</launch>

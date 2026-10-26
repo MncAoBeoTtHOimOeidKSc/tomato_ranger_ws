@@ -1,0 +1,24 @@
+<launch>
+  <arg name="base_frame" default="base_link"/>
+  <arg name="odom_frame" default="odom"/>
+  <arg name="raw_scan_topic" default="/helios/scan"/>
+  <arg name="scan_topic" default="/helios/scan_filtered"/>
+  <arg name="start_scan" default="true"/>
+  <arg name="rviz" default="true"/>
+
+  <include if="$(arg start_scan)" file="$(find ranger_mapping)/launch/helios_scan.launch">
+    <arg name="base_frame" value="$(arg base_frame)"/>
+    <arg name="scan_topic" value="$(arg raw_scan_topic)"/>
+    <arg name="filtered_scan_topic" value="$(arg scan_topic)"/>
+  </include>
+
+  <node pkg="gmapping" type="slam_gmapping" name="helios_gmapping" output="screen">
+    <remap from="scan" to="$(arg scan_topic)"/>
+    <param name="base_frame" value="$(arg base_frame)"/>
+    <param name="odom_frame" value="$(arg odom_frame)"/>
+    <param name="map_frame" value="map"/>
+    <rosparam command="load" file="$(find ranger_mapping)/config/gmapping.yaml"/>
+  </node>
+  <node if="$(arg rviz)" pkg="rviz" type="rviz" name="mapping_rviz"
+        args="-d $(find ranger_mapping)/rviz/mapping.rviz" output="screen"/>
+</launch>

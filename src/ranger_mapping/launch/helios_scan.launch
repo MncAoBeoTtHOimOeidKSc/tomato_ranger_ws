@@ -1,0 +1,31 @@
+<launch>
+  <arg name="base_frame" default="base_link"/>
+  <arg name="lidar_frame" default="rslidar"/>
+  <arg name="cloud_topic" default="/rslidar_points"/>
+  <arg name="scan_topic" default="/helios/scan"/>
+  <arg name="filtered_scan_topic" default="/helios/scan_filtered"/>
+  <arg name="min_height" default="-0.20"/>
+  <arg name="max_height" default="0.20"/>
+
+  <!-- Measured base-to-lidar translation in metres; quaternion is yaw=pi. -->
+  <node pkg="tf2_ros" type="static_transform_publisher" name="base_to_helios"
+        args="0.2767 0 0.661 0 0 1 0 $(arg base_frame) $(arg lidar_frame)"/>
+
+  <node pkg="pointcloud_to_laserscan" type="pointcloud_to_laserscan_node"
+        name="helios_pointcloud_to_laserscan" output="screen">
+    <remap from="cloud_in" to="$(arg cloud_topic)"/>
+    <remap from="scan" to="$(arg scan_topic)"/>
+    <rosparam command="load" file="$(find ranger_mapping)/config/helios_scan.yaml"/>
+    <param name="target_frame" value="$(arg lidar_frame)"/>
+    <param name="min_height" value="$(arg min_height)" type="double"/>
+    <param name="max_height" value="$(arg max_height)" type="double"/>
+  </node>
+
+  <!-- Remove body returns without changing the scan frame or lidar origin. -->
+  <node pkg="laser_filters" type="scan_to_scan_filter_chain"
+        name="helios_footprint_filter" output="screen">
+    <remap from="scan" to="$(arg scan_topic)"/>
+    <remap from="scan_filtered" to="$(arg filtered_scan_topic)"/>
+    <rosparam command="load" file="$(find ranger_mapping)/config/helios_footprint_filter.yaml" subst_value="true"/>
+  </node>
+</launch>
