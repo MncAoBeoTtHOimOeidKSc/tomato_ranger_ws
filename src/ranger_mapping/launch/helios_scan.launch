@@ -4,7 +4,7 @@
   <arg name="cloud_topic" default="/rslidar_points"/>
   <arg name="scan_topic" default="/helios/scan"/>
   <arg name="filtered_scan_topic" default="/helios/scan_filtered"/>
-  <arg name="min_height" default="-0.20"/>
+  <arg name="min_height" default="-0.7285"/>
   <arg name="max_height" default="0.20"/>
 
   <!-- Measured base-to-lidar translation in metres; quaternion is yaw=pi. -->
